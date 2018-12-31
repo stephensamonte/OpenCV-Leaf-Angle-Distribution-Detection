@@ -1,8 +1,9 @@
+import math
 import numpy as np
 import cv2
 
 # Read image
-img = cv2.imread('2.jpg')
+img = cv2.imread('./Photos/3.jpg')
 
 # Convert Image to Grayscale
 grey_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -43,63 +44,46 @@ cv2.imshow('Edges image',edges)
 
 # Line Detection
 # This returns an array of r and theta values 
-lines = cv2.HoughLines(edges,1,np.pi/180, 80) 
-  
-# The below for loop runs till r and theta values  
-# are in the range of the 2d array 
-for r,theta in lines[0]: 
-      
-    # Stores the value of cos(theta) in a 
-    a = np.cos(theta) 
-  
-    # Stores the value of sin(theta) in b 
-    b = np.sin(theta) 
-      
-    # x0 stores the value rcos(theta) 
-    x0 = a*r 
-      
-    # y0 stores the value rsin(theta) 
-    y0 = b*r 
-      
-    # x1 stores the rounded off value of (rcos(theta)-1000sin(theta)) 
-    x1 = int(x0 + 1000*(-b)) 
-      
-    # y1 stores the rounded off value of (rsin(theta)+1000cos(theta)) 
-    y1 = int(y0 + 1000*(a)) 
-  
-    # x2 stores the rounded off value of (rcos(theta)+1000sin(theta)) 
-    x2 = int(x0 - 1000*(-b)) 
-      
-    # y2 stores the rounded off value of (rsin(theta)-1000cos(theta)) 
-    y2 = int(y0 - 1000*(a)) 
-      
-    # cv2.line draws a line in img from the point(x1,y1) to (x2,y2). 
-    # (0,0,255) denotes the colour of the line to be  
-    #drawn. In this case, it is red.  
-    cv2.line(img,(x1,y1), (x2,y2), (0,0,255),2) 
+#lines = cv2.HoughLines(edges,4,np.pi/180, 80)
+lines = cv2.HoughLinesP(edges, 1, np.pi/180, 85, maxLineGap=40)
+
+for line in lines:
+    x1, y1, x2, y2 = line[0]
+    # add lines to image
+    cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+
+
+#lines = cv2.HoughLines(edges,1,np.pi/180,200)
+#lines = cv2.HoughLines(edges, 1, np.pi / 180, 100, None, 0, 0)
+
+#for i in range(0, len(lines)):
+#    rho = lines[i][0][0]
+#    theta = lines[i][0][1]
+#    a = math.cos(theta)
+#    b = math.sin(theta)
+#    x0 = a * rho
+#    y0 = b * rho
+#    pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+#    pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+#    cv2.line(img, pt1, pt2, (255,0,0), 3, cv2.LINE_AA)
+
+cv2.imshow("Image lines", img)
       
 # All the changes made in the input image are finally 
 # written on a new image houghlines.jpg 
-cv2.imwrite('linesDetected.jpg', img) 
-
-
+# cv2.imwrite('linesDetected.jpg', img) 
 
 # Line Detection
-# rho = 50 # distance resolution in pixels of the Hough grid
-# theta = np.pi/180 # angular resolution in radians of the Hough grid
-# threshold = 80     # minimum number of votes (intersections in Hough grid cell)
-# min_line_length = 100 #minimum number of pixels making up a line
-# max_line_gap = 10    # maximum gap in pixels between connectable line segments
-# line_image = np.copy(img)*0 # creating a blank to draw lines on
+#rho = 50 # distance resolution in pixels of the Hough grid
+#theta = np.pi/180 # angular resolution in radians of the Hough grid
+#threshold = 80     # minimum number of votes (intersections in Hough grid cell)
+#min_line_length = 100 #minimum number of pixels making up a line
+#max_line_gap = 10    # maximum gap in pixels between connectable line segments
+#line_image = np.copy(img)*0 # creating a blank to draw lines on
 
 
-# # Get Detected lines 
-# lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
-
-# # Draw lines onto blank image 
-# for line in lines:
-#     for x1,y1,x2,y2 in line:
-#         cv2.line(line_image,(x1,y1),(x2,y2),(255,0,0),2)
+# Get Detected lines 
+#lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
 
 # lines_edges = cv2.addWeighted(img, 0.8, line_image, 1, 0)
 # cv2.imshow('lines_edges image',lines_edges)
@@ -108,5 +92,5 @@ k = cv2.waitKey(0)
 if k == 27:         # wait for ESC key to exit
     cv2.destroyAllWindows()
 elif k == ord('s'): # wait for 's' key to save and exit
-    cv2.imwrite('messigray.png',img)
+    cv2.imwrite('test.png',img)
     cv2.destroyAllWindows()
