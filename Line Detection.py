@@ -2,8 +2,101 @@ import math
 import numpy as np
 import cv2
 
+#def centerOfLines():
+
+def extractLines(edges):
+    # Line Detection
+    # This returns an array of r and theta values 
+    #lines = cv2.HoughLines(edges,4,np.pi/180, 80)
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 85, maxLineGap=40)
+
+    angle = 0.0;
+    count_stem_lines = 0
+
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        # add lines to image
+        cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+    
+
+    #cv2.imshow("Image lines", img)
+    cv2.imwrite("verticalLines.jpg", vertical)
+    
+def verticalLines(image):
+
+    gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 25, 15)
+    
+    # Copy image to extract vertical lines from
+    vertical = np.copy(thresh)
+    
+    # Specify size on vertical axis
+    rows = vertical.shape[0]
+    verticalsize = math.ceil(rows / 10)
+
+    # Create structure element for extracting vertical lines through morphology operations
+    verticalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (1, verticalsize))
+    
+
+    # Apply morphology operations
+    vertical = cv2.erode(vertical, verticalStructure)
+    vertical = cv2.dilate(vertical, verticalStructure)
+    print(vertical)
+
+    # Show extracted vertical lines
+    cv2.imwrite("vertical.jpg", vertical)
+    
+
+    # sum columns. Find the 2 columns with the most 1s
+    #for i in range(len(vertical)):
+    #    for j in range(len(vertical[i])):
+    #        print(vertical[i][j])
+
+    #cv2.imshow('mmmmm1',thresh)
+    thresh-=vertical
+    #cv2.imshow('mmmmm',thresh)
+
+    cv2.imwrite("noVerticalThresh.jpg", thresh)
+    
+    
+def horizontalLines(image):
+    gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 25, 15)
+    
+    # Create the images that will use to extract the horizontal and vertical lines
+    horizontal = np.copy(thresh)
+
+    # Specify size on horizontal axis
+    cols = horizontal.shape[1]
+    horizontal_size = math.ceil(cols / 20)
+
+    # Create structure element for extracting horizontal lines through morphology operations
+    horizontalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (horizontal_size, 1))
+
+    # Apply morphology operations
+    horizontal = cv2.erode(horizontal, horizontalStructure)
+    horizontal = cv2.dilate(horizontal, horizontalStructure)
+
+    # Show extracted horizontal lines
+    cv2.imwrite("horizontal.jpg", horizontal)
+    
+    
+    
+def radToDegree(val):
+    #print(np.rad2deg(val))
+    return np.rad2deg(val)
+    
 # Read image
 img = cv2.imread('./Photos/3.jpg')
+
+# Locate the Horizontal and Vertical pixels
+horizontalLines(img)
+verticalLines(img)
+
+# Retrieve vertical line values
+imgVert = cv2.imread('vertical.jpg')
+#extractLines(imgVert)
+
 
 # Convert Image to Grayscale
 grey_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -45,12 +138,44 @@ cv2.imshow('Edges image',edges)
 # Line Detection
 # This returns an array of r and theta values 
 #lines = cv2.HoughLines(edges,4,np.pi/180, 80)
-lines = cv2.HoughLinesP(edges, 1, np.pi/180, 85, maxLineGap=40)
+lines = cv2.HoughLinesP(edges, 1, np.pi/180, 50, maxLineGap=40)
 
-for line in lines:
+angle = 0.0
+count_stem_lines = 0
+
+sumAngle = 0.0
+for line in lines:    
     x1, y1, x2, y2 = line[0]
     # add lines to image
     cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+    radianA = math.atan2(abs(y1 - y2), abs(x1 - x2))
+    
+    angleHor = np.rad2deg(radianA)
+    angle = angleHor 
+    
+    print("Hello Rice", angle)
+    sumAngle += angle;
+
+    count_stem_lines += 1 
+    
+
+    """
+    #print(deg)
+    if (deg > 91.0 or deg < 89.0):
+        convert = deg - 90
+        print(deg-90)
+    else:
+        count_stem_lines = count_stem_lines + 1 
+        print("ROOT StemLines: ", count_stem_lines)
+    """
+
+averageAng = sumAngle / count_stem_lines
+print("sum: ", sumAngle)
+print("StemLines: ", count_stem_lines)
+print("averageAng: ", averageAng)
+
+
+    
 
 
 #lines = cv2.HoughLines(edges,1,np.pi/180,200)
