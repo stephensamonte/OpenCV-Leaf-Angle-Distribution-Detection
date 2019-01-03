@@ -31,3 +31,6 @@ This is my 3rd use of OpenCV for a project. My first attempt with OpenCV was a s
 
 2019.01.02 Improvemnents to work with real usecase rice plant images. I was given images by Omar Samonte of Rice Plants that he wishes to use the program for. Problems: There's so many things going on in the backgorund. So, I looked into ignoring the background. I added function to filter the image based on the color of the plant. I could train a Tensor Flow Model to mask the plant but it is currently unnecessary. 
 
+# Project: 
+2018.12.31 Email from Omar: 
+I was wondering if each picture could be converted into line segments, and then the average angle of all line segments can be computed. This average angle would be useful in  evaluating the rice that we grow in our field experiments. In rice breeding where we evaluate thousands of different rice rows, we prefer a plant type that has erect leaves and stems because this plant type is more efficient in photosynthesis and it also is less prone to lodging (or plants leaning and falling down)
