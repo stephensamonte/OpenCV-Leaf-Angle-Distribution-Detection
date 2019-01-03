@@ -4,6 +4,61 @@ import cv2
 
 #def centerOfLines():
 
+
+def maskPlantByColor(image):
+    # Make a copy of the image
+    im = np.copy(originalImage)
+
+    ## convert to hsv
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    ## mask of green (36,0,0) ~ (70, 255,255)
+    mask1 = cv2.inRange(hsv, (36, 0, 0), (70, 255,255))
+
+    ## mask o yellow (15,0,0) ~ (36, 255, 255)
+    #mask2 = cv2.inRange(hsv, (15,0,0), (36, 255, 255))
+
+    ## final mask and masked
+    #mask = cv2.bitwise_or(mask1, mask2)
+    target = cv2.bitwise_and(im,im, mask=mask1)
+
+    cv2.imwrite("target.png", target)
+    return target
+
+    
+def getEdges(blur_gray):    
+    # Canny Edge Detection
+    low_threshold = 150
+    high_threshold = 250
+    edges = cv2.Canny(blur_gray, low_threshold, high_threshold, apertureSize = 3)
+
+    # Disaply Blurred Image
+    #cv2.imshow('Edges image',edges)
+    #Save Image
+    cv2.imwrite("Edges.jpg", edges)
+    return edges
+    
+# URL: https://docs.opencv.org/3.4/db/d5c/tutorial_py_bg_subtraction.html
+def getCountour(image):
+    # Retrieve photo 
+
+    # Make a copy of the image
+    im = np.copy(originalImage)
+    #imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(image, 127, 255, 0)
+    im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    #extract contour data
+    cnt = contours[0]
+    M = cv2.moments(cnt)
+    print("Moment", M)    
+    
+    cv2.drawContours(im, contours, -1, (255,0,0), 3)
+    cv2.imwrite("contour.jpg", im)
+    #cv2.imshow('contour',hierarchy)
+    #return contours
+
+
 def extractLines(edges):
     # Line Detection
     # This returns an array of r and theta values 
@@ -16,7 +71,7 @@ def extractLines(edges):
     for line in lines:
         x1, y1, x2, y2 = line[0]
         # add lines to image
-        cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+        #cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
     
 
     #cv2.imshow("Image lines", img)
@@ -37,7 +92,7 @@ def verticalLines(image):
     # Create structure element for extracting vertical lines through morphology operations
     verticalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (1, verticalsize))
     
-
+ 
     # Apply morphology operations
     vertical = cv2.erode(vertical, verticalStructure)
     vertical = cv2.dilate(vertical, verticalStructure)
@@ -87,42 +142,32 @@ def radToDegree(val):
     return np.rad2deg(val)
     
 # Read image
-img = cv2.imread('./Photos/3.jpg')
+originalImage = cv2.imread('./Photos/11.jpg')
+
+#filter image by color 
+#filterImage = maskPlantByColor(originalImage)
+filterImage = originalImage
 
 # Locate the Horizontal and Vertical pixels
-horizontalLines(img)
-verticalLines(img)
-
-# Retrieve vertical line values
-imgVert = cv2.imread('vertical.jpg')
-#extractLines(imgVert)
-
+#horizontalLines(originalImage)
+#verticalLines(originalImage)
 
 # Convert Image to Grayscale
-grey_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-# Original Image
-#cv2.imshow('image',img)
-
-# Gray Scale Image
-# cv2.imshow('Gray image',grey_image)
-
+grey_image = cv2.cvtColor(filterImage, cv2.COLOR_BGR2GRAY)
 
 # Blur Image to remove noise
 kernel_size = 5
 blur_gray = cv2.GaussianBlur(grey_image,(kernel_size, kernel_size),0)
+#Save Image
+cv2.imwrite("blur_gray.jpg", blur_gray)
 
-# Disaply Blurred Image
-cv2.imshow('Gray image',blur_gray)
+# Find Edges
+edges = getEdges(blur_gray)
 
+#cv2.imshow('Edges image',edges)
 
-# Canny Edge Detection
-low_threshold = 50
-high_threshold = 150
-edges = cv2.Canny(blur_gray, low_threshold, high_threshold, apertureSize = 3)
-
-# Disaply Blurred Image
-cv2.imshow('Edges image',edges)
+# Find contours
+#getCountour(blur_gray)
 
 
 # Shape of region where to find lines
@@ -138,27 +183,38 @@ cv2.imshow('Edges image',edges)
 # Line Detection
 # This returns an array of r and theta values 
 #lines = cv2.HoughLines(edges,4,np.pi/180, 80)
-lines = cv2.HoughLinesP(edges, 1, np.pi/180, 50, maxLineGap=40)
+minLineLength = 10
+maxLineGap=40
+threshold = 50
+## cv2.HoughLinesP(image, rho, theta, threshold[, lines[, minLineLength[, maxLineGap]]])
+lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, None, 10, 1)
 
 angle = 0.0
 count_stem_lines = 0
-
 sumAngle = 0.0
+
+# Perform action on each line
 for line in lines:    
     x1, y1, x2, y2 = line[0]
     # add lines to image
-    cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+    cv2.line(originalImage, (x1, y1), (x2, y2), (255, 0, 0), 10)
+
+    # calculate radian angle of line to horizontal
     radianA = math.atan2(abs(y1 - y2), abs(x1 - x2))
-    
+
+    # Calculate angle in degree to horizontal
     angleHor = np.rad2deg(radianA)
     angle = angleHor 
     
-    print("Hello Rice", angle)
+    #print("Hello Rice", angle)
     sumAngle += angle;
 
+    # Determine the number of line segments
     count_stem_lines += 1 
     
 
+    #print(angle)
+    
     """
     #print(deg)
     if (deg > 91.0 or deg < 89.0):
@@ -169,14 +225,11 @@ for line in lines:
         print("ROOT StemLines: ", count_stem_lines)
     """
 
+# Calculate the average angle 
 averageAng = sumAngle / count_stem_lines
 print("sum: ", sumAngle)
 print("StemLines: ", count_stem_lines)
 print("averageAng: ", averageAng)
-
-
-    
-
 
 #lines = cv2.HoughLines(edges,1,np.pi/180,200)
 #lines = cv2.HoughLines(edges, 1, np.pi / 180, 100, None, 0, 0)
@@ -192,7 +245,9 @@ print("averageAng: ", averageAng)
 #    pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
 #    cv2.line(img, pt1, pt2, (255,0,0), 3, cv2.LINE_AA)
 
-cv2.imshow("Image lines", img)
+#cv2.imshow("Image lines", img)
+#Save Image
+cv2.imwrite("HoughLines.jpg", originalImage)
       
 # All the changes made in the input image are finally 
 # written on a new image houghlines.jpg 
@@ -219,3 +274,11 @@ if k == 27:         # wait for ESC key to exit
 elif k == ord('s'): # wait for 's' key to save and exit
     cv2.imwrite('test.png',img)
     cv2.destroyAllWindows()
+
+
+# Original Image
+#cv2.imshow('image',img)
+# Gray Scale Image
+# cv2.imshow('Gray image',grey_image)
+# Disaply Blurred Image
+#cv2.imshow('Gray image',blur_gray)
