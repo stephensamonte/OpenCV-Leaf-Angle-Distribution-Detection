@@ -1,5 +1,5 @@
 # OpenCV Leaf Angle Distribution Detection
-The goal is to measure Rice Plant Leaf Angle Distribution using images. Leaf Angle Distribution is imporatant as more erect leaves allow the leaves below to have more sunlight which affects the photosynthesis process. The end goal program is either a Web Applicaiton where images of plants could be uploaded that will return the Leaf Angle Distribution. 
+The goal is to measure Rice Plant Leaf Angle Distribution using images. Given an image of a Rice Plant this will located Rice Plant leaves and determined its leaf angle distribution. Leaf Angle Distribution is imporatant as more erect leaves allow the leaves below to have more sunlight which affects the photosynthesis process. The end goal program is either a Web Applicaiton where images of plants could be uploaded that will return the Leaf Angle Distribution. 
 
 Additional features and data regarding the rice plant may be added in the future. 
 
