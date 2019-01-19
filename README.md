@@ -3,6 +3,14 @@ The goal is to measure Rice Plant Leaf Angle Distribution using images. Given an
 
 Additional features and data regarding the rice plant may be added in the future. 
 
+Terminal Output: 
+![alt text](https://raw.githubusercontent.com/stephensamonte/OpenCV-Leaf-Angle-Distribution-Detection/master/Terminal%20Output/Terminal%20Output.PNG)
+
+Example Result: ![alt_text](https://github.com/stephensamonte/OpenCV-Leaf-Angle-Distribution-Detection/blob/master/Archive/2019.01.20%20Curved%20HoughLines.jpg?raw=true)
+
+# Notes: 
+- Currently waiting new image data that is leveled with the ground. 
+
 # My Experience / Context
 This is my 3rd use of OpenCV for a project. My first attempt with OpenCV was a self Driving Remote Contorl Car and my second project with OpenCV was the HumanDetection Python Program. 
 
